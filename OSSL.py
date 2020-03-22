@@ -239,26 +239,7 @@ def openssl(file_name,val,null):
 	elif val==4:
 		if null=='y':
 			input("PRESS ENTER TO VIEW AVAILABLE CIPHERS")
-			print("+---------------------------------------------------------------------------------------+")				
-			try:
-				row = "| [{i1:<2d}] {val1:<20s} | [{i2:<2d}] {val2:<20s} | [{i3:<2d}] {val3:<24s} |".format
-				x=0
-				y=1
-				z=2
-				for b in range(len(lis)+1):
-					print(row(i1=x , val1=lis[x] , i2=y , val2=lis[y] , i3=z , val3=lis[z]))
-					print("+---------------------------------------------------------------------------------------+")		
-					x = x+3
-					y = y+3
-					z = z+3
-	
-			except:
-				try:
-					if lis[y]!='':
-						row = "| [{i1:<3d}] {val1:<20s} | [{i2:<3d}] {val2:<20s}".format 
-						print(row(i1=x , val1=lis[x] , i2=y , val2=lis[y]))
-				except:
-					pass
+			display_cipher()
 					
 			cipher = int(input("[*] SELECT THE CIPHER YOU WISH TO USE ==> "))
 			
@@ -525,7 +506,7 @@ def main():
 		exit()
 	
 if __name__=='__main__':
-	try
+	try:
 		main()
 	
 	except:	
