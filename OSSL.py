@@ -3,16 +3,23 @@
 # Written by : Aniket.N.Bhagwate ~{NullByte007}
 # Base tool : OpenSSL
 
+
 import os 
 
 cls = lambda:os.system("clear")
 os.system("rm -rf DUMP 2> error.txt 1>error.txt")
 os.system("mkdir DUMP")
+
 os.system("openssl version > version.txt")
 f = open("version.txt",'r')
 version = f.read()
 os.system("rm -rf version.txt")
-
+os.system("pwd > pwd.txt")
+pwd = open("pwd.txt",'r')
+pwd = pwd.read().split("\n")
+pwd.pop()
+pwd = pwd[0]
+os.system("rm pwd.txt")
 
 banner="""
 
@@ -31,7 +38,7 @@ banner="""
 
 main_menu = """
  ===================================
-| [1]	 ENCRYPT                    |
+| [1]	 ENCRYPT(FILE/KEY)          |
  ===================================
 | [2]    DECRYPT(FILE/KEY)          |
  ===================================
@@ -205,34 +212,74 @@ def openssl(file_name,val,null):
 
 
 	if val==1:
-		display_cipher()
-		cipher = int(input("\n[*] SELECT THE CIPHER YOU WISH TO USE ==> "))
-		print("\n[*] SELECTED CIPHER : \033[30;42m {} \033[m".format(lis[cipher]))
-		password = input("\n[*] ENTER THE PASSKEY TO USE : ==> ")
-		print("\n[!] USING BASE64 ENCODING (DEFAULT)")
 		
-		os.system("openssl enc -{} -base64 -out ENCRYPTED_MSG.txt -k {} -in DUMP/file 2> DUMP/error.txt ".format(lis[cipher],password))
-		input("\n[*] SUCCESSFULLY ENCRYPTED MESSAGE --> SAVED IN FILE: ENCRYPTED_MSG.txt")
-		os.system("rm -rf DUMP 2> DUMP/error.txt")
+		
+		print(" ----------------------------------")
+		print("| [1] ENCRYPT USING PASSKEY        |")
+		print(" ----------------------------------")
+		print("| [2] ENCRYPT USING RSAPRIVATE KEY |")
+		print(" ----------------------------------")
+		
+		choice = input("\n\t==> ")
+		
+		if choice=='1':
+			display_cipher()
+			cipher = int(input("\n[*] SELECT THE CIPHER YOU WISH TO USE ==> "))
+			print("\n[*] SELECTED CIPHER : \033[30;42m {} \033[m".format(lis[cipher]))
+		
+			password = input("\n[*] ENTER THE PASSKEY TO USE : ==> ")
+			print("\n[!] USING BASE64 ENCODING (DEFAULT)")
+		
+			os.system("openssl enc -{} -base64 -out ENCRYPTED_MSG -k {} -in DUMP/file 2> DUMP/error.txt ".format(lis[cipher],password))
+			input("\n[*] SUCCESSFULLY ENCRYPTED DATA --> SAVED IN FILE: {}/ENCRYPTED_MSG.txt".format(pwd))
+		
+		
+		elif choice=='2':
+			print("[!] ENTER RSA KEY NAME IF THE KEY IS PRESENT IN WORKING DIRECTORY ELSE GIVE FULL PATH \n")
+			key_name = input("ENTER YOUR RSA KEY NAME : ==> ")
+	
+			os.system("openssl rsautl -encrypt -in DUMP/file -out ENCRYPTED_DATA -inkey {} -pubin".format(key_name))
+			input("\n[*] SUCCESSFULLY ENCRYPTED DATA --> SAVED IN FILE: {}/ENCRYPTED_DATA.txt".format(pwd))
+		
+		
 		main()
 		
 	elif val==2:
-		display_cipher()
-		cipher = int(input("\n[*] SELECT THE CIPHER YOU WISH TO USE ==> "))
-		print("\n[*] SELECTED CIPHER : \033[30;42m {} \033[m".format(lis[cipher]))
-		password = input("\n[*] ENTER THE PASSKEY TO USE : ==> ")
-		print("\n[!] USING BASE64 ENCODING (DEFAULT)")
+	
+		print(" ----------------------------------")
+		print("| [1] DECRYPT USING PASSKEY        |")
+		print(" ----------------------------------")
+		print("| [2] DECRYPT USING RSAPRIVATE KEY |")
+		print(" ----------------------------------")
+	
+		choice = input("\n\t==> ")
+		
+		if choice=='1':
+			display_cipher()
+			cipher = int(input("\n[*] SELECT THE CIPHER YOU WISH TO USE ==> "))
+			print("\n[*] SELECTED CIPHER : \033[30;42m {} \033[m".format(lis[cipher]))
+			
+			password = input("\n[*] ENTER THE PASSKEY TO USE : ==> ")
+			print("\n[!] USING BASE64 ENCODING (DEFAULT)")
 		
 		
-		os.system("openssl enc -d  -{} -base64 -out DECRYPTED_MSG.txt -k {} -in DUMP/file 2> DUMP/error.txt".format(lis[cipher],password))
-		input("\n[*] SUCCESSFULLY DECRYPTED MESSAGE --> SAVED IN FILE: DECRYPTED_MSG.txt")
-		os.system("rm -rf DUMP 2> DUMP/error.txt")
+			os.system("openssl enc -d  -{} -base64 -out DECRYPTED_MSG -k {} -in DUMP/file 2> DUMP/error.txt".format(lis[cipher],password))
+			input("\n[*] SUCCESSFULLY DECRYPTED DATA --> SAVED IN FILE: {}/DECRYPTED_MSG.txt".format(pwd))
+		
+		elif choice=='2':
+			print("[!] ENTER RSA KEY NAME IF THE KEY IS PRESENT IN WORKING DIRECTORY ELSE GIVE FULL PATH \n")
+			key_name = input("ENTER YOUR RSA KEY NAME : ==> ")
+	
+			os.system("openssl rsautl -decrypt -in DUMP/file -out DECRYPTED_DATA -inkey {}".format(key_name))
+			input("\n[*] SUCCESSFULLY ENCRYPTED DATA --> SAVED IN FILE: {}/DECRYPTED_DATA.txt".format(pwd))
+		
+		
 		main()
 	
 	
 	elif val==3:
 		os.system("openssl rsa -in {} -out decrypted_{} 2> DUMP/error.txt".format(file_name,file_name))
-		input("\n[*] SUCCESSFULLY DECRYPTED MESSAGE --> SAVED IN FILE: DECRYPTED_MSG.txt")
+		input("\n[*] SUCCESSFULLY DECRYPTED KEY --> SAVED IN FILE: {}/DECRYPTED_MSG.txt".format(pwd))
 		os.system("rm -rf DUMP 2> DUMP/error.txt")
 		main()
 	
@@ -243,16 +290,31 @@ def openssl(file_name,val,null):
 					
 			cipher = int(input("[*] SELECT THE CIPHER YOU WISH TO USE ==> "))
 			
-			os.system("openssl genrsa -out RSA-KEY.key -{} 2> DUMP/error.txt ".format(lis[cipher]))
-			input("\n[*] SUCCESSFULLY GENERATED RSA KEY --> SAVED IN FILE: RSA-KEY.key")
+			os.system("openssl genrsa -out KEYS/RSA-KEY.key -{} 2> DUMP/error.txt ".format(lis[cipher]))
+			input("\n[*] SUCCESSFULLY GENERATED RSA KEY --> SAVED IN FILE: {}/KEYS/RSA-KEY.key".format(pwd))
 		
 		elif null=='n':
-			os.system("openssl genrsa -out RSA-KEY.key 2> DUMP/error.txt")
-			input("\n[*] SUCCESSFULLY GENERATED RSA KEY --> SAVED IN FILE: RSA-KEY.key")
+			os.system("openssl genrsa -out KEYS/RSA-KEY.key 2> DUMP/error.txt")
+			input("\n[*] SUCCESSFULLY GENERATED RSA KEY --> SAVED IN FILE: {}/KEYS/RSA-KEY.key".format(pwd))
 			
 		main()
 	
 	
+
+
+'''
+
+
+Public-key crypto is not for encrypting arbitrarily long files. One uses a symmetric cipher (say AES) to do the normal
+encryption. Each time a new random symmetric key is generated, used, and then encrypted with the RSA cipher (public key).
+The ciphertext together with the encrypted symmetric key is transferred to the recipient. The recipient decrypts the 
+symmetric key using his private key, and then uses the symmetric key to decrypt the message.
+
+The private key is never shared, only the public key is used to encrypt the random symmetric cipher.
+
+
+'''
+
 	
 def Encrypt():
 	enc_sub_menu()
@@ -310,6 +372,7 @@ def GenRsa():
 def GenCert():
 	cls()
 	print(banner)
+	os.system("mkdir CERTIFICATES")
 	choice = input("DO YOU HAVE CSR AND A PRIVATE KEY ? (Y/N)  : ").lower()
 	if choice=='y':
 		print("[!] ENTER CSR NAME IF THE CSR IS PRESENT IN WORKING DIRECTORY ELSE GIVE FULL PATH \n")
@@ -322,22 +385,22 @@ def GenCert():
 		if days=='':
 			days=365
 			
-		os.system("openssl x509 -in {} -out MY-CERTIFICATE.crt -req -signkey {} -days {} 2> DUMP/error.txt".format(csr_name , key_name , days))
+		os.system("openssl x509 -in {} -out CERTIFICATES/MY-CERTIFICATE.crt -req -signkey {} -days {}".format(csr_name , key_name , days))
 		
-		input("\n[*] SUCCESSFULLY GENERATED SELF SIGNED CERTIFICATE --> SAVED IN FILE: MY-CERTIFICATE.crt")
+		input("\n[*] SUCCESSFULLY GENERATED SELF SIGNED CERTIFICATE --> SAVED IN FILE: {}/CERTIFICATES/MY-CERTIFICATE.crt".format(pwd))
 		
 		
 	elif choice=='n':
 		os.system("mkdir cert")
-		os.system("openssl req -new -out cert/MYCSR.csr -keyout cert/MYKEY.key 2> DUMP/error.txt")
+		os.system("openssl req -new -out cert/MYCSR.csr -keyout cert/MYKEY.key -nodes ")
 		days = input("[*] ENTER VALID TIME PERIOD : [In DAYS] [DEFAULT : 365 DAYS] :  ")
 		if days=='':
 			days=365
 			
-		os.system("openssl x509 -in cert/{} -out MY-CERTIFICATE.crt -req -signkey cert/{} -days {} 2> DUMP/error.txt".format("MYCSR.csr","MYKEY.key",days))
+		os.system("openssl x509 -in cert/{} -out CERTIFICATES/MY-CERTIFICATE.crt -req -signkey cert/{} -days {} ".format("MYCSR.csr","MYKEY.key",days))
 		os.system("rm -rf cert 2> DUMP/error.txt")
 		
-		input("\n[*] SUCCESSFULLY GENERATED SELF SIGNED CERTIFICATE --> SAVED IN FILE: MY-CERTIFICATE.crt")
+		input("\n[*] SUCCESSFULLY GENERATED SELF SIGNED CERTIFICATE --> SAVED IN FILE: {}/CERTIFICATES/MY-CERTIFICATE.crt".format(pwd))
 		
 	main()
 	
@@ -351,7 +414,7 @@ def GenCsr():
 		print("[!] ENTER KEY NAME IF THE KEY IS PRESENT IN WORKING DIRECTORY ELSE GIVE FULL PATH \n")
 		key_name = input("ENTER KEY NAME : ==> ")
 		os.system("openssl req -new -key {} -out MY-CSR.csr 2> DUMP/error.txt".format(key_name))
-		input("\n[*] SUCCESSFULLY GENERATED CSR  --> SAVED IN FILE: MY-CSR")
+		input("\n[*] SUCCESSFULLY GENERATED CSR  --> SAVED IN FILE: {}/MY-CSR".format(pwd))
 	
 	elif choice=='n':
 		print("[!] GENERATING NEW [PRIVATE KEY] AND CSR")
@@ -365,9 +428,9 @@ def GetPublic():
 	print(banner)
 	print("[!] ENTER KEY NAME IF THE KEY IS PRESENT IN WORKING DIRECTORY ELSE GIVE FULL PATH \n")
 	key_name = input("ENTER KEY NAME : ==> ")
-	os.system("openssl rsa -in {} -pubout -out PUBLIC-KEY.key 2> DUMP/error.txt".format(key_name))
+	os.system("openssl rsa -in {} -pubout -out KEYS/PUBLIC-KEY.key 2> DUMP/error.txt".format(key_name))
 	
-	input("\n[*] SUCCESSFULLY GENERATED PUBLIC KEY --> SAVED IN FILE: PUBLIC-KEY.key")
+	input("\n[*] SUCCESSFULLY GENERATED PUBLIC KEY --> SAVED IN FILE: {}/KEYS/PUBLIC-KEY.key".format(pwd))
 	
 	main()
 	
@@ -467,7 +530,7 @@ def GenDigest():
 		input("\n[*] SELECTED CIPHER : \033[30;42m {} \033[m \n\n <PRESS ENTER>".format(dgst[choice]))
 		
 		os.system("openssl {} {} > MSG_DIGEST".format(dgst[choice] , file_name))
-		input("\n[*] SUCCESSFULLY GENERATED MESSAGE DIGEST --> SAVED IN FILE: MSG_DIGEST")
+		input("\n[*] SUCCESSFULLY GENERATED MESSAGE DIGEST --> SAVED IN FILE: {}/MSG_DIGEST".format(pwd))
 		main()
 				
 def main():
